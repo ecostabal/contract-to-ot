@@ -52,52 +52,10 @@ async function getMondayItemData(itemId) {
     }
 }
 
-// Función para crear un nuevo item en otro board.
-async function createNewItemInOtherBoard(boardId, itemName, columnValues, formattedLocation) {
-    try {
-        // 1. Crear el ítem
-        const createMutation = `mutation {
-            create_item(
-                board_id: ${boardId},
-                item_name: "${itemName}",
-                column_values: ${JSON.stringify(columnValues)}
-            ) {
-                id
-            }
-        }`;
-
-        const createResponse = await axios.post('https://api.monday.com/v2', { query: createMutation }, { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } });
-        const newItemId = createResponse.data.data.create_item.id;
-
-        // 2. Actualizar la columna de ubicación con formattedLocation
-        if (formattedLocation) {
-            const updateMutation = `mutation {
-                change_simple_column_value(
-                    item_id: ${newItemId},
-                    board_id: ${boardId},
-                    column_id: "location",
-                    value: ${JSON.stringify(formattedLocation)}
-                ) {
-                    id
-                }
-            }`;
-            await axios.post('https://api.monday.com/v2', { query: updateMutation }, { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } });
-        }
-
-        console.log('Nuevo item creado y actualizado con éxito');
-        return newItemId;
-    } catch (error) {
-        console.error('Error al crear o actualizar un nuevo item:', error);
-
-        // Puedes lanzar la excepción nuevamente para que sea manejada en la función principal
-        throw error;
-    }
-}
-
 // Función para procesar subelementos y crear nuevos ítems
-async function processSubElements(itemId) {
+async function processSubElementsAndCreateItems(boardId, itemId) {
     try {
-        console.log('Iniciando procesamiento de subelementos para el item:', itemId);
+        console.log('Iniciando procesamiento de subelementos y creación de nuevos ítems para el item:', itemId);
 
         const itemData = await getMondayItemData(itemId);
         if (!itemData || Object.keys(itemData).length === 0 || !itemData.columnsData) {
@@ -176,15 +134,16 @@ async function processSubElements(itemId) {
                 };
 
                 // Crear el nuevo item en el otro tablero con el nombre personalizado
-                await createNewItemInOtherBoard(5598495616, nuevoItemNombre, newItemData, formattedLocation);
-                console.log('Subelemento procesado con éxito:', tipoFirmanteColumn.text);
+                const newItemId = await createNewItemInOtherBoard(boardId, nuevoItemNombre, newItemData, formattedLocation);
+                console.log('Subelemento procesado con éxito:', tipoFirmanteColumn.text, ' - Nuevo ítem creado con ID:', newItemId);
             }
         }
     } catch (error) {
-        console.error('Error al procesar subelementos:', error);
+        console.error('Error al procesar subelementos y crear nuevos ítems:', error);
         throw error;
     }
 }
+
 
 exports.contractToOt = async (req, res) => {
     try {
@@ -200,11 +159,16 @@ exports.contractToOt = async (req, res) => {
             throw new Error('La solicitud no contiene la estructura esperada de un evento de Monday.com');
         }
 
+        const boardId = 5598495616; // Reemplaza esto con el ID correcto del tablero de destino
         const itemId = req.body.event.pulseId;
-        await processSubElements(itemId);
+
+        // Utiliza la nueva función para procesar subelementos y crear nuevos ítems
+        await processSubElementsAndCreateItems(boardId, itemId);
+
         res.status(200).send("Items procesados y nuevos items creados correctamente");
     } catch (error) {
         console.error("Error en la función principal:", error.message);
         res.status(400).send("Error en la solicitud: " + error.message); // Cambiado a 400 Bad Request para errores de validación
     }
 };
+
