@@ -23,7 +23,7 @@ async function getMondayItemData(itemId) {
 
             return { columnsData, subitemsData };
         } else {
-            throw new Error('Estructura de respuesta inesperada o sin datos');
+            return {}; // Devuelve un objeto vacío si no hay datos
         }
     } catch (error) {
         console.error('Error al obtener datos del item:', error);
@@ -51,15 +51,24 @@ async function createNewItemInOtherBoard(boardId, itemName, columnValues) {
             }
         }`;
 
+       // Verifica si formattedLocation está definido y actualiza la ubicación
+       if (formattedLocation) {
+        const updateMutation = `mutation {
+            change_multiple_column_values(item_id: ${newItemId}, board_id: ${boardId}, column_values: "{\"location\": \"${formattedLocation}\"}") {
+                id
+            }
+        }`;
         await axios.post('https://api.monday.com/v2', { query: updateMutation }, { headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } });
-
-        console.log('Nuevo item creado y actualizado con éxito');
-        return newItemId;
-    } catch (error) {
-        console.error('Error al crear o actualizar un nuevo item:', error);
-        throw error;
     }
+
+    console.log('Nuevo item creado y actualizado con éxito');
+    return newItemId;
+} catch (error) {
+    console.error('Error al crear o actualizar un nuevo item:', error);
+    throw error;
 }
+}
+
 
 // Función para procesar subelementos y crear nuevos ítems
 async function processSubElements(itemId) {
@@ -67,8 +76,7 @@ async function processSubElements(itemId) {
         console.log('Iniciando procesamiento de subelementos para el item:', itemId);
 
         const itemData = await getMondayItemData(itemId);
-
-        if (!itemData || !itemData.column_values) {
+        if (!itemData || Object.keys(itemData).length === 0 || !itemData.column_values) {
             console.error('No se encontraron datos de columnas para el item con ID:', itemId);
             return;
         }
@@ -148,7 +156,7 @@ async function processSubElements(itemId) {
                 };
 
                 // Crear el nuevo item en el otro tablero con el nombre personalizado
-                await createNewItemInOtherBoard(5598495616, nuevoItemNombre, newItemData);
+                await createNewItemInOtherBoard(5598495616, nuevoItemNombre, newItemData, formattedLocation);
                 console.log('Subelemento procesado con éxito:', tipoFirmante);
             }
         }
