@@ -64,6 +64,13 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
             return;
         }
 
+        // Verificar si el tipo de contrato es "Arriendo"
+        const contractTypeColumn = itemData.columnsData.find(cv => cv.id === 'estado_1');
+        if (!contractTypeColumn || contractTypeColumn.text !== 'Arriendo') {
+            console.log('Tipo de contrato no es Arriendo. Saliendo del proceso.');
+            return;
+        }
+
         const { columnsData, subitemsData } = itemData;
         let formattedLocation = '';
         const locationColumn = columnsData.find(cv => cv.id === 'ubicaci_n');
@@ -95,6 +102,8 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                 const phone = subitemColumns.find(column => column.id === 'reflejo_2')?.text || '';
                 const email = subitemColumns.find(column => column.id === 'reflejo_3')?.text || '';
                 const comisionRate = subitemColumns.find(column => column.id === 'n_meros7')?.text || '';
+                const razonSocial = subitemColumns.find(column => column.id === 'texto2')?.text || '';
+                const rutRazonSocial = subitemColumns.find(column => column.id === 'texto1')?.text
                 const fullName = `${name} ${lastName}`;
 
                 const contractType = columnsData.find(cv => cv.id === 'estado_1')?.text || '';
@@ -122,6 +131,8 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                     tel_fono: phone,
                     correo_electr_nico: { email: email, text: email },
                     n_meros0: comisionRate,
+                    texto92: razonSocial,
+                    texto97: rutRazonSocial,
                 };
 
                 const newItemId = await createNewItemInOtherBoard(boardId, newItemName, newItemData, formattedLocation);
