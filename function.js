@@ -94,6 +94,7 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                 const id = subitemColumns.find(column => column.id === 'reflejo_1')?.text || '';
                 const phone = subitemColumns.find(column => column.id === 'reflejo_2')?.text || '';
                 const email = subitemColumns.find(column => column.id === 'reflejo_3')?.text || '';
+                const comisionRate = subitemColumns.find(column => column.id === 'n_meros7')?.text || '';
                 const fullName = `${name} ${lastName}`;
 
                 const contractType = columnsData.find(cv => cv.id === 'estado_1')?.text || '';
@@ -119,7 +120,8 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                     texto4: lastName,
                     texto3: id,
                     tel_fono: phone,
-                    correo_electr_nico: JSON.stringify({ email: email, text: email }),
+                    correo_electr_nico: { email: email, text: email },
+                    n_meros0: comisionRate,
                 };
 
                 const newItemId = await createNewItemInOtherBoard(boardId, newItemName, newItemData, formattedLocation);
