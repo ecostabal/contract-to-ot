@@ -124,7 +124,6 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                     texto95: storageUnits,
                     n_meros: rentalValue,
                     n_meros9: notaryFee,
-                    texto6: fullName,
                     texto: name,
                     texto4: lastName,
                     texto3: id,
