@@ -102,6 +102,7 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                 const phone = subitemColumns.find(column => column.id === 'reflejo_2')?.text || '';
                 const email = subitemColumns.find(column => column.id === 'reflejo_3')?.text || '';
                 const comisionRate = subitemColumns.find(column => column.id === 'n_meros7')?.text || '';
+                const notaryFee = subitemColumns.find(cv => cv.id === 'n_meros4')?.text || '';
                 const razonSocial = subitemColumns.find(column => column.id === 'texto2')?.text || '';
                 const rutRazonSocial = subitemColumns.find(column => column.id === 'texto1')?.text
                 const fullName = `${name} ${lastName}`;
@@ -112,7 +113,6 @@ async function processSubElementsAndCreateItems(boardId, itemId) {
                 const parkingSpaces = columnsData.find(cv => cv.id === 'texto4')?.text || '';
                 const storageUnits = columnsData.find(cv => cv.id === 'texto2')?.text || '';
                 const rentalValue = columnsData.find(cv => cv.id === 'n_meros')?.text || '';
-                const notaryFee = columnsData.find(cv => cv.id === 'n_meros5')?.text || '';
 
                 const newItemName = `OT - ${fullName}`;
                 const newItemData = {
